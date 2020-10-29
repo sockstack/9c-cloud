@@ -12,6 +12,6 @@ func authApi(e *gin.Engine)  {
 	})
 
 	oauthHandler := handler.NewOauthHandler()
-	e.GET("/token", oauthHandler.Token)
+	e.POST("/token", oauthHandler.Token)
 	e.GET("/authorize", oauthHandler.Authorize)
 }

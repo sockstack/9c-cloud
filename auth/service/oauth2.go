@@ -44,6 +44,10 @@ func NewOauth2() *Oauth2 {
 	s.SetResponseErrorHandler(func(re *errors.Response) {
 		log.Println(re)
 	})
+	
+	s.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+		return "123", nil
+	})
 
 	return &Oauth2{server: s}
 }
