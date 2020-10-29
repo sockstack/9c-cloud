@@ -15,7 +15,7 @@ func NewOauthHandler() *OauthHandler {
 }
 
 func (o *OauthHandler) Authorize(ctx *gin.Context)  {
-	o.oauth.Unwrap(o.oauth.HandleTokenRequest(ctx.Writer, ctx.Request))
+	o.oauth.Unwrap(o.oauth.HandleAuthorizeRequest(ctx.Writer, ctx.Request))
 }
 
 func (o *OauthHandler) Token(ctx *gin.Context)  {
