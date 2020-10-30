@@ -14,9 +14,22 @@ import (
 
 type Oauth2 struct {
 	server *server.Server
+	session *SessionService
+	option *oauth2Option
 }
 
-func NewOauth2() *Oauth2 {
+func NewOauth2(handlers ...Oauth2OptionHandler) (oauth2 *Oauth2) {
+	option := &oauth2Option{LoginAddress: "/login"}
+	for _, h := range handlers {
+		h(option)
+	}
+
+	oauth2 = &Oauth2{option: option}
+	oauth2.init()
+	return
+}
+
+func (o *Oauth2) init() {
 	manager := manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
@@ -37,22 +50,25 @@ func NewOauth2() *Oauth2 {
 	s := server.NewDefaultServer(manager)
 	s.SetAllowGetAccessRequest(true)
 	s.SetClientInfoHandler(server.ClientFormHandler)
-	s.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		log.Println(err)
-		return
-	})
-	s.SetResponseErrorHandler(func(re *errors.Response) {
-		log.Println(re)
-	})
-	
-	s.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-		return "123", nil
-	})
+	s.SetUserAuthorizationHandler(o.userAuthorizationHandler)
+	s.SetResponseErrorHandler(o.responseErrorHandler)
+	s.SetInternalErrorHandler(o.internalErrorHandler)
 
-	return &Oauth2{server: s}
+	o.server = s
+	o.session = NewSessionService()
 }
 
 func (o *Oauth2) HandleAuthorizeRequest(w http.ResponseWriter, r *http.Request) (err error) {
+	session, err := o.session.Get(r, "oauth2_id")
+	if err != nil {
+		return
+	}
+	if session.Values["oauth2_id"] == nil {
+		log.Println(session.Values)
+		w.Header().Set("Location", o.option.LoginAddress)
+		w.WriteHeader(http.StatusFound)
+		return nil
+	}
 	err = o.server.HandleAuthorizeRequest(w, r)
 	return
 }
@@ -62,8 +78,32 @@ func (o *Oauth2) HandleTokenRequest(w http.ResponseWriter, r *http.Request) (err
 	return
 }
 
+func (o *Oauth2) userAuthorizationHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+	return "123", nil
+}
+
+func (o *Oauth2) responseErrorHandler(re *errors.Response) {
+	log.Println(re)
+}
+
+func (o *Oauth2) internalErrorHandler(err error) (re *errors.Response){
+	return
+}
+
 func (o *Oauth2) Unwrap(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+type oauth2Option struct {
+	LoginAddress string
+}
+
+type Oauth2OptionHandler func(o *oauth2Option)
+
+func WithLoginAddress(address string) Oauth2OptionHandler {
+	return func(o *oauth2Option) {
+		o.LoginAddress = address
 	}
 }

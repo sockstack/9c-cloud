@@ -15,7 +15,9 @@ type engine struct {
 type R func(engine *gin.Engine)
 
 func newAuth() *engine {
-	return &engine{server: gin.New()}
+	e := &engine{server: gin.New()}
+	e.server.LoadHTMLGlob("static/*.html")
+	return e
 }
 
 func (e *engine) Route(route R) *engine {
