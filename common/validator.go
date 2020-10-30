@@ -20,6 +20,7 @@ type Validator struct {
 	message string
 	rule Rule
 	query IQuery
+	ctx *gin.Context
 	trans ut.Translator
 }
 
@@ -37,12 +38,13 @@ func NewValidator() *Validator {
 	return &Validator{trans: trans}
 }
 
-func (v *Validator) Json(ctx *gin.Context, query IQuery) {
-	v.validate(ctx.ShouldBindJSON(query)).unwrap()
+func (v *Validator) Json() {
+	v.validate(v.ctx.ShouldBindJSON(v.query)).unwrap()
 }
 
-func (v *Validator) Validate(query IQuery) *Validator {
+func (v *Validator) Validate(ctx *gin.Context, query IQuery) *Validator {
 	v.query = query
+	v.ctx = ctx
 	return v
 }
 
