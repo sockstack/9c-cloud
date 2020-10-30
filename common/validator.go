@@ -41,8 +41,9 @@ func (v *Validator) Json(ctx *gin.Context, query IQuery) {
 	v.validate(ctx.ShouldBindJSON(query)).unwrap()
 }
 
-func (v *Validator) Validate(query IQuery)  {
+func (v *Validator) Validate(query IQuery) *Validator {
 	v.query = query
+	return v
 }
 
 func (v *Validator) validate(err error) *Validator {
