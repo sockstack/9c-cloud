@@ -1,5 +1,7 @@
 package model
 
+import "github.com/sockstack/9c-cloud/common"
+
 type UserDto struct {
 	ID uint32
 	Username string
@@ -19,4 +21,8 @@ type UserQuery struct {
 
 func NewUserQuery() *UserQuery {
 	return &UserQuery{}
+}
+
+func (u *UserQuery) Rule() common.Rule {
+	return map[string]map[string]string{}
 }

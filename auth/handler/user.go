@@ -5,6 +5,7 @@ import (
 	"github.com/sockstack/9c-cloud/auth/contract/service"
 	"github.com/sockstack/9c-cloud/auth/model"
 	service2 "github.com/sockstack/9c-cloud/auth/service"
+	"github.com/sockstack/9c-cloud/common"
 	"net/http"
 )
 
@@ -24,5 +25,5 @@ func (u *UserHandler) LoginView(ctx *gin.Context) {
 
 func (u *UserHandler) DoLogin(ctx *gin.Context) {
 	query := model.NewUserQuery()
-	err := ctx.ShouldBind(query)
+	common.NewValidator().Validate(ctx, query).Json()
 }
