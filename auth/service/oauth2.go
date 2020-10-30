@@ -64,7 +64,15 @@ func (o *Oauth2) HandleAuthorizeRequest(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	if session.Values["oauth2_id"] == nil {
-		log.Println(session.Values)
+		if r.Form == nil {
+			if err = r.ParseForm(); err != nil {
+				return
+			}
+		}
+		if err = o.session.Save(w, r, "rf", r.Form); err != nil {
+			return
+		}
+		session, _ = o.session.Get(r, "rf")
 		w.Header().Set("Location", o.option.LoginAddress)
 		w.WriteHeader(http.StatusFound)
 		return nil

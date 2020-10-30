@@ -1,8 +1,10 @@
 package service
 
 import (
+	"encoding/gob"
 	"github.com/gorilla/sessions"
 	"net/http"
+	"net/url"
 )
 
 type SessionService struct {
@@ -10,6 +12,7 @@ type SessionService struct {
 }
 
 func NewSessionService() *SessionService {
+	gob.Register(url.Values{})
 	service := &SessionService{}
 	service.init()
 	return service
